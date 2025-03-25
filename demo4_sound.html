@@ -7,9 +7,17 @@
     <script src="https://unpkg.com/@jspsych/plugin-audio-keyboard-response@2.1.0"></script>
     <script src="https://unpkg.com/@jspsych/plugin-survey-html-form@2.1.0"></script>
     <link href="https://unpkg.com/jspsych@8.2.1/css/jspsych.css" rel="stylesheet" type="text/css" />
+    <link rel="icon" href="data:,">
     <title>聲音判斷實驗</title>
     <style>
         body { background-color: black; color: white; }
+        #jspsych-target {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* 讓區塊填滿整個螢幕 */
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -33,7 +41,7 @@
 
             var correctAnswers = allData.filter(trial => trial.correct === 1).length;
             var totalStimuli = allData.length;
-            var accuracy = (correctAnswers / 60) * 100;
+            var accuracy = (correctAnswers / totalStimuli) * 100;
 
             allData.push({
                 subject_code: lastData.subject_code || "unknown",
@@ -50,11 +58,8 @@
                 body: JSON.stringify(allData),
                 mode: "no-cors"
             })
-            .then(response => response.json())
-            .then(data => console.log("Success:", data))
             .catch(error => console.error("Error:", error));
-        }
-    });
+
 
         var timeline = [];
 
