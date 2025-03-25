@@ -2,7 +2,6 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" href="data:,">
     <script src="https://unpkg.com/jspsych@8.2.1"></script>
     <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.1.0"></script>
     <script src="https://unpkg.com/@jspsych/plugin-audio-keyboard-response@2.1.0"></script>
@@ -24,20 +23,47 @@
     <div id="jspsych-target"></div>
     <script>
         var jsPsych = initJsPsych({
-            display_element: 'jspsych-target',  // 確保顯示區域正確
-            on_finish: function() {
-                sendDataToGoogleSheets(jsPsych.data.get().json());
-            }
-        });
+        on_finish: function() {
+            var lastData = jsPsych.data.get().last(1).values()[0];
+            var allData = jsPsych.data.get().trials.map(trial => ({
+                subject_code: trial.subject_code || "unknown",
+                name: trial.name || "unknown",
+                date: trial.date || "unknown",
+                stimulus1: trial.stimulus1 || "",
+                stimulus2: trial.stimulus2 || "",
+                correct_response: trial.correct_response || "",
+                response: trial.response || "",
+                correct: trial.correct ? 1 : 0,
+                rt: trial.rt || 0,
+                time_elapsed: trial.time_elapsed || 0,
+            }));
+
+            var correctAnswers = allData.filter(trial => trial.correct === 1).length;
+            var totalStimuli = allData.length;
+            var accuracy = (correctAnswers / 60) * 100;
+
+            allData.push({
+                subject_code: lastData.subject_code || "unknown",
+                name: lastData.name || "unknown",
+                date: lastData.date || "unknown",
+                accuracy: accuracy.toFixed(2) + "%"
+            });
+
+            // Send data to Google Apps Script
+            var url = "https://script.google.com/macros/s/AKfycbzzPZjDYl8hIMRJu-ItYw5PYPDciqw9HD8xQs5qz-diK5uHQARaUX4WQ9k5uJqslYPn/exec";
+            fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(allData),
+                mode: "no-cors"
+            })
+            .then(response => response.json())
+            .then(data => console.log("Success:", data))
+            .catch(error => console.error("Error:", error));
+        }
+    });
 
         var timeline = [];
-
-        // 歡迎頁面
-        const welcome = {
-            type: jsPsychHtmlKeyboardResponse,
-            stimulus: '<p>感謝你參與實驗, 按任意鍵繼續</p>'
-        };
-        timeline.push(welcome);
 
         // 同意書
         timeline.push({
@@ -56,20 +82,21 @@
         });
 
         // 受試者姓名和日期輸入
-       var nameAndDateInput = {
-          type: jsPsychSurveyHtmlForm,
-          preamble: '<p>請輸入您的姓名以及今日日期</p>',
-          html: ` 
-            <p>本人 <input id="first" name="first" type="text" placeholder="姓名" /> 已看完上頁內容, 
-            於 <input name="second" type="text" placeholder="日期" /> 同意參加本實驗。</p>
-          `,
-          autofocus: 'first',
-          on_finish: function(data) {
-            jsPsych.data.addProperties({
-              name: data.response.first,
-              date: data.response.second
-            });
-          }
+        var nameAndDateInput = {
+            type: jsPsychSurveyHtmlForm,
+            preamble: '<p>請輸入您的姓名以及今日日期</p>',
+            html: `
+                <p>本人 <input id="first" name="first" type="text" placeholder="姓名" required /> 
+                已看完上頁內容, 於 <input name="second" type="date" required /> 
+                同意參加本實驗。</p>
+            `,
+            autofocus: 'first',
+            on_finish: function(data) {
+                jsPsych.data.addProperties({
+                    name: data.response.first,
+                    date: data.response.second
+                });
+            }
         };
         timeline.push(nameAndDateInput);
 
@@ -105,9 +132,9 @@
             };
 
         // 聲音刺激
-        var sounds = ['https://leslieliuc.github.io/js_audio/A.wav', 'https://leslieliuc.github.io/js_audio/B.wav', 'https://leslieliuc.github.io/js_audio/C.wav',
-                      'https://leslieliuc.github.io/js_audio/D.wav', 'https://leslieliuc.github.io/js_audio/E.wav', 'https://leslieliuc.github.io/js_audio/F.wav',
-                      'https://leslieliuc.github.io/js_audio/G.wav', 'https://leslieliuc.github.io/js_audio/da.wav', 'https://leslieliuc.github.io/js_audio/da3.wav', 'https://leslieliuc.github.io/js_audio/du.wav'];
+        var sounds = ['A.wav', 'B.wav', 'C.wav',
+                      'D.wav', 'E.wav', 'F.wav',
+                      'G.wav', 'da.wav', 'da3.wav', 'du.wav'];
 
         function createSoundTrial() {
             let chosen_sounds = jsPsych.randomization.sampleWithoutReplacement(sounds, 2);
@@ -149,14 +176,11 @@
             timeline.push(...createSoundTrial());
         }
 
-        function sendDataToGoogleSheets(data) {
-            fetch("https://script.google.com/macros/s/AKfycbzzPZjDYl8hIMRJu-ItYw5PYPDciqw9HD8xQs5qz-diK5uHQARaUX4WQ9k5uJqslYPn/exec", {
-                method: "POST",
-                mode: "cors",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ experiment_data: data })
+        timeline.push({
+            type: jsPsychHtmlKeyboardResponse,
+            stimulus: '<p>按任意鍵結束實驗，感謝您的參與！</p>'+
+                        '<p>有任何問題可寄信至:brain.learning.lab@gmail.com </p>'
             });
-        }
 
         jsPsych.run(timeline);
     </script>
