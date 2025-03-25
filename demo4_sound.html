@@ -16,6 +16,7 @@
     <div id="jspsych-target"></div>
     <script>
         var jsPsych = initJsPsych({
+            display_element: 'jspsych-target',  // 確保顯示區域正確
             on_finish: function() {
                 sendDataToGoogleSheets(jsPsych.data.get().json());
             }
