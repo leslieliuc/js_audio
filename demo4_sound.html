@@ -96,7 +96,7 @@
         const code_entry = {
             type: jsPsychSurveyHtmlForm,
             preamble: '<p>請輸入您的受試者編碼：</p>',
-            html: '<p>受試者編碼: <input type="text" id="subject_code" name="subject_code" size="10" required /></p>',
+            html: '<p>受試者編碼: <input type="text" name="subject_code" size="10" required /></p>',
             autofocus: "subject_code",
             on_finish: function(data) {
                 jsPsych.data.addProperties({
