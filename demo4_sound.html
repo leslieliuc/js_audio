@@ -78,8 +78,8 @@
             type: jsPsychSurveyHtmlForm,
             preamble: '<p>請輸入您的姓名以及今日日期</p>',
             html: `
-                <p>本人 <input name="first" type="text" placeholder="姓名" required /> 
-                已看完上頁內容, 於 <input name="first" type="date" required /> 
+                <p>本人 <input name="first" id="first" type="text" placeholder="姓名" required /> 
+                已看完上頁內容, 於 <input name="second" id="second" type="date" required /> 
                 同意參加本實驗。</p>
             `,
             autofocus: "first",
@@ -96,7 +96,7 @@
         const code_entry = {
             type: jsPsychSurveyHtmlForm,
             preamble: '<p>請輸入您的受試者編碼：</p>',
-            html: '<p>受試者編碼: <input type="text" id="subject_code" size="10" required /></p>',
+            html: '<p>受試者編碼: <input type="text" id="subject_code" name="subject_code" size="10" required /></p>',
             autofocus: "subject_code",
             on_finish: function(data) {
                 jsPsych.data.addProperties({
