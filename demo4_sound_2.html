@@ -73,7 +73,7 @@
         // 同意書
         timeline.push({
             type: jsPsychHtmlKeyboardResponse,
-            stimulus:   
+            stimulus: `   
                 <div style="text-align: justify;">
                     <p>感謝你參加本次實驗，以下是實驗相關內容與同意參加確認。</p>
                     <p>實驗目的:字形相異判斷與反應時間</p>
@@ -84,16 +84,18 @@
                     <p>本實驗由國立台灣師範大學李俊仁老師實驗室發布</p>
                     <p>按任意鍵繼續</p>
                 </div>
+            `
         });
 
         // 受試者姓名和日期輸入
         var nameAndDateInput = {
             type: jsPsychSurveyHtmlForm,
             preamble: '<p>請輸入您的姓名以及今日日期</p>',
-            html: 
+            html: `
                 <p>本人 <input id="first" name="first" type="text" placeholder="姓名" required /> 
                 已看完上頁內容, 於 <input id="second" name="second" type="date" required /> 
                 同意參加本實驗。</p>
+            `
             ,
             on_finish: function(data) {
                 jsPsych.data.addProperties({
