@@ -47,44 +47,43 @@
     <script>
         var jsPsych = initJsPsych({
         display_element: "jspsych-container",
-        on_finish: function() {
-            var lastData = jsPsych.data.get().last(1).values()[0];
-            var allData = jsPsych.data.get().trials.map(trial => ({
-                subject_code: trial.subject_code || "unknown",
-                name: trial.name || "unknown",
-                date: trial.date || "unknown",
-                stimulus1: trial.sound_trial_1 || "",
-                stimulus2: trial.sound_trial_2 || "",
-                correct_response: trial.correct_response || "",
-                response: trial.response || "",
-                correct: trial.correct ? 1 : 0,
-                rt: trial.rt || 0,
-                time_elapsed: trial.time_elapsed || 0,
-            }));
+        var jsPsych = initJsPsych({
+    on_finish: function() {
+        var lastData = jsPsych.data.get().last(1).values()[0];
+        var allData = jsPsych.data.get().trials.map(trial => ({
+            subject_code: trial.subject_code || "unknown",
+            name: trial.name || "unknown",
+            date: trial.date || "unknown",
+            stimulus1: trial.sound_trial_1 || "",
+            stimulus2: trial.sound_trial_2 || "",
+            correct_response: trial.correct_response || "",
+            response: trial.response || "",
+            correct: trial.correct ? 1 : 0,
+            rt: trial.rt || 0,
+            time_elapsed: trial.time_elapsed || 0,
+        }));
 
-            var correctAnswers = allData.filter(trial => trial.correct === 1).length;
-            var totalStimuli = allData.length;
-            var accuracy = (correctAnswers / totalStimuli) * 100;
+        var correctAnswers = allData.filter(trial => trial.correct === 1).length;
+        var totalStimuli = allData.length;
+        var accuracy = (correctAnswers / totalStimuli) * 100;
 
-            allData.push({
-                subject_code: lastData.subject_code || "unknown",
-                name: lastData.name || "unknown",
-                date: lastData.date || "unknown",
-                accuracy: accuracy.toFixed(2) + "%"
-            });
+        allData.push({
+            subject_code: lastData.subject_code || "unknown",
+            name: lastData.name || "unknown",
+            date: lastData.date || "unknown",
+            accuracy: accuracy.toFixed(2) + "%"
+        });
 
-            // Send data to Google Apps Script
-            var url = "https://script.google.com/macros/s/AKfycbwje-lWR13D_7TFBqqF5XepaTtQCZfC0WRkrTkgUUFcTOG8lnEmR9dumXd0wVwssYFh/exec";
-            fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(allData),
-            })
-            .then(response => response.json())  // 解析 JSON 回應
-            .then(data => console.log("Success:", data))
-            .catch(error => console.error("Error:", error));
-        }
-    });
+        var url = "https://script.google.com/macros/s/AKfycbzzPZjDYl8hIMRJu-ItYw5PYPDciqw9HD8xQs5qz-diK5uHQARaUX4WQ9k5uJqslYPn/exec";
+        fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(allData),
+            mode: "no-cors"
+        })
+        .catch(error => console.error("Error:", error));
+    }  // <-- This closing bracket was missing
+});  // <-- Ensure initJsPsych() is properly closed before defining the timeline
 
     var timeline = [];
 
