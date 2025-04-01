@@ -83,25 +83,27 @@
             .then(response => response.json())  // 解析 JSON 回應
             .then(data => console.log("Success:", data))
             .catch(error => console.error("Error:", error));
+        }
+    });
 
-        var timeline = [];
+    var timeline = [];
 
         // 同意書
-        timeline.push({
-            type: jsPsychHtmlKeyboardResponse,
-            stimulus: `   
-                <div style="text-align: justify;">
-                    <p>感謝你參加本次實驗，以下是實驗相關內容與同意參加確認。</p>
-                    <p>實驗目的:字形相異判斷與反應時間</p>
-                    <p>研究方法與程序:閱讀本頁面後，你會進入練習的部分，此部分主要是讓你熟悉實驗中會用到的反應按鍵，以及你所需要的操作。預計有五題。</p>
-                    <p>接著便是正式實驗，時間約為30分鐘。</p>
-                    <p>實驗副作用:實驗不會帶來任何副作用</p>
-                    <p>實驗退出及中止:你可以隨時撤銷同意或中止實驗。</p>
-                    <p>本實驗由國立台灣師範大學李俊仁老師實驗室發布</p>
-                    <p>按任意鍵繼續</p>
-                </div>
-            `
-        });
+    timeline.push({
+         type: jsPsychHtmlKeyboardResponse,
+         stimulus: `   
+            <div style="text-align: justify;">
+                <p>感謝你參加本次實驗，以下是實驗相關內容與同意參加確認。</p>
+                <p>實驗目的:字形相異判斷與反應時間</p>
+                <p>研究方法與程序:閱讀本頁面後，你會進入練習的部分，此部分主要是讓你熟悉實驗中會用到的反應按鍵，以及你所需要的操作。預計有五題。</p>
+                <p>接著便是正式實驗，時間約為30分鐘。</p>
+                <p>實驗副作用:實驗不會帶來任何副作用</p>
+                <p>實驗退出及中止:你可以隨時撤銷同意或中止實驗。</p>
+                <p>本實驗由國立台灣師範大學李俊仁老師實驗室發布</p>
+                <p>按任意鍵繼續</p>
+            </div>
+         `
+    });
 
         // 受試者姓名和日期輸入
         var nameAndDateInput = {
