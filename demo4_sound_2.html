@@ -46,63 +46,62 @@
 </body>
     <script>
         var jsPsych = initJsPsych({
-        display_element: "jspsych-container",
-        var jsPsych = initJsPsych({
-    on_finish: function() {
-        var lastData = jsPsych.data.get().last(1).values()[0];
-        var allData = jsPsych.data.get().trials.map(trial => ({
-            subject_code: trial.subject_code || "unknown",
-            name: trial.name || "unknown",
-            date: trial.date || "unknown",
-            stimulus1: trial.sound_trial_1 || "",
-            stimulus2: trial.sound_trial_2 || "",
-            correct_response: trial.correct_response || "",
-            response: trial.response || "",
-            correct: trial.correct ? 1 : 0,
-            rt: trial.rt || 0,
-            time_elapsed: trial.time_elapsed || 0,
-        }));
+            display_element: "jspsych-container",
+            on_finish: function() {
+                var lastData = jsPsych.data.get().last(1).values()[0];
+                var allData = jsPsych.data.get().trials.map(trial => ({
+                    subject_code: trial.subject_code || "unknown",
+                    name: trial.name || "unknown",
+                    date: trial.date || "unknown",
+                    stimulus1: trial.sound_trial_1 || "",
+                    stimulus2: trial.sound_trial_2 || "",
+                    correct_response: trial.correct_response || "",
+                    response: trial.response || "",
+                    correct: trial.correct ? 1 : 0,
+                    rt: trial.rt || 0,
+                    time_elapsed: trial.time_elapsed || 0,
+                }));
+    
+                var correctAnswers = allData.filter(trial => trial.correct === 1).length;
+                var totalStimuli = allData.length;
+                var accuracy = (correctAnswers / totalStimuli) * 100;
 
-        var correctAnswers = allData.filter(trial => trial.correct === 1).length;
-        var totalStimuli = allData.length;
-        var accuracy = (correctAnswers / totalStimuli) * 100;
+                allData.push({
+                    subject_code: lastData.subject_code || "unknown",
+                    name: lastData.name || "unknown",
+                    date: lastData.date || "unknown",
+                    accuracy: accuracy.toFixed(2) + "%"
+                });
 
-        allData.push({
-            subject_code: lastData.subject_code || "unknown",
-            name: lastData.name || "unknown",
-            date: lastData.date || "unknown",
-            accuracy: accuracy.toFixed(2) + "%"
-        });
+                var url = "https://script.google.com/macros/s/AKfycbwje-lWR13D_7TFBqqF5XepaTtQCZfC0WRkrTkgUUFcTOG8lnEmR9dumXd0wVwssYFh/exec";
+                fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(allData),
+                    mode: "no-cors"
+                })
+                .catch(error => console.error("Error:", error));
+            }  // <-- This closing bracket was missing
+        });  // <-- Ensure initJsPsych() is properly closed before defining the timeline
 
-        var url = "https://script.google.com/macros/s/AKfycbwje-lWR13D_7TFBqqF5XepaTtQCZfC0WRkrTkgUUFcTOG8lnEmR9dumXd0wVwssYFh/exec";
-        fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(allData),
-            mode: "no-cors"
-        })
-        .catch(error => console.error("Error:", error));
-    }  // <-- This closing bracket was missing
-});  // <-- Ensure initJsPsych() is properly closed before defining the timeline
-
-    var timeline = [];
+        var timeline = [];
 
         // 同意書
-    timeline.push({
-         type: jsPsychHtmlKeyboardResponse,
-         stimulus: `   
-            <div style="text-align: justify;">
-                <p>感謝你參加本次實驗，以下是實驗相關內容與同意參加確認。</p>
-                <p>實驗目的:字形相異判斷與反應時間</p>
-                <p>研究方法與程序:閱讀本頁面後，你會進入練習的部分，此部分主要是讓你熟悉實驗中會用到的反應按鍵，以及你所需要的操作。預計有五題。</p>
-                <p>接著便是正式實驗，時間約為30分鐘。</p>
-                <p>實驗副作用:實驗不會帶來任何副作用</p>
-                <p>實驗退出及中止:你可以隨時撤銷同意或中止實驗。</p>
-                <p>本實驗由國立台灣師範大學李俊仁老師實驗室發布</p>
-                <p>按任意鍵繼續</p>
-            </div>
-         `
-    });
+        timeline.push({
+             type: jsPsychHtmlKeyboardResponse,
+             stimulus: `   
+                <div style="text-align: justify;">
+                    <p>感謝你參加本次實驗，以下是實驗相關內容與同意參加確認。</p>
+                    <p>實驗目的:字形相異判斷與反應時間</p>
+                    <p>研究方法與程序:閱讀本頁面後，你會進入練習的部分，此部分主要是讓你熟悉實驗中會用到的反應按鍵，以及你所需要的操作。預計有五題。</p>
+                    <p>接著便是正式實驗，時間約為30分鐘。</p>
+                    <p>實驗副作用:實驗不會帶來任何副作用</p>
+                    <p>實驗退出及中止:你可以隨時撤銷同意或中止實驗。</p>
+                    <p>本實驗由國立台灣師範大學李俊仁老師實驗室發布</p>
+                    <p>按任意鍵繼續</p>
+                </div>
+             `
+        });
 
         // 受試者姓名和日期輸入
         var nameAndDateInput = {
@@ -151,7 +150,7 @@
             choices: "NO_KEYS",
             trial_duration: 1000,
             data: { task: 'fixation' }
-            };
+        };
 
         // 聲音刺激
         var sounds = ['A.wav', 'B.wav', 'C.wav',
@@ -202,8 +201,8 @@
             type: jsPsychHtmlKeyboardResponse,
             stimulus: '<p>按任意鍵結束實驗，感謝您的參與！</p>'+
                         '<p>有任何問題可寄信至:brain.learning.lab@gmail.com </p>'
-            });
+        });
 
         jsPsych.run(timeline);
-    </script>
+</script>
 </html>
