@@ -11,17 +11,10 @@
     <title>聲音判斷實驗</title>
     <style>
         body { background-color: black; color: white; }
-        #jspsych-target {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh; /* 讓區塊填滿整個螢幕 */
-            text-align: center;
-        }
     </style>
 </head>
 <body>
-    <div id="jspsych-target"></div>
+</body>
     <script>
         var jsPsych = initJsPsych({
         on_finish: function() {
@@ -30,8 +23,8 @@
                 subject_code: trial.subject_code || "unknown",
                 name: trial.name || "unknown",
                 date: trial.date || "unknown",
-                stimulus1: trial.stimulus1 || "",
-                stimulus2: trial.stimulus2 || "",
+                stimulus1: trial.sound_trial_1 || "",
+                stimulus2: trial.sound_trial_2 || "",
                 correct_response: trial.correct_response || "",
                 response: trial.response || "",
                 correct: trial.correct ? 1 : 0,
@@ -56,135 +49,129 @@
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(allData),
-                mode: "no-cors"
+                mode: "cors"
             })
             .catch(error => console.error("Error:", error));
         }
     });
-    var timeline = [];
+
+        var timeline = [];
 
         // 同意書
-    timeline.push({
-        type: jsPsychHtmlKeyboardResponse,
-        stimulus: `   
-            <div style="text-align: justify;">
-                <p>感謝你參加本次實驗，以下是實驗相關內容與同意參加確認。</p>
-                <p>實驗目的:字形相異判斷與反應時間</p>
-                <p>研究方法與程序:閱讀本頁面後，你會進入練習的部分，此部分主要是讓你熟悉實驗中會用到的反應按鍵，以及你所需要的操作。預計有五題。</p>
-                <p>接著便是正式實驗，時間約為30分鐘。</p>
-                <p>實驗副作用:實驗不會帶來任何副作用</p>
-                <p>實驗退出及中止:你可以隨時撤銷同意或中止實驗。</p>
-                <p>本實驗由國立台灣師範大學李俊仁老師實驗室發布</p>
-                <p>按任意鍵繼續</p>
-            </div>
-        `
-    });
-
-        // 受試者姓名和日期輸入
-    var nameAndDateInput = {
-        type: jsPsychSurveyHtmlForm,
-        preamble: '<p>請輸入您的姓名以及今日日期</p>',
-        html:  `
-            <p>本人 <input id="first" name="first" type="text" placeholder="姓名" required /> 
-            已看完上頁內容, 於 <input name="second" type="date" required /> 
-            同意參加本實驗。</p>
-         `
-        ,
-        autofocus: 'first',
-        on_finish: function(data) {
-            jsPsych.data.addProperties({
-                name: data.response.first,
-                date: data.response.second
-            });
-        }
-    };
-    timeline.push(nameAndDateInput);
-
-    // 受試者編碼輸入
-    const code_entry = {
-        type: jsPsychSurveyHtmlForm,
-        preamble: '<p>請輸入您的受試者編碼：</p>',
-        html: '<p>受試者編碼: <input type="text" name="subject_code" size="10" required /></p>',
-        autofocus: true,
-        on_finish: function(data) {
-            jsPsych.data.addProperties({
-                subject_code: data.response.subject_code
-            });
-        }
-    };
-    timeline.push(code_entry);
-
-        // 任務說明
-    const introduction = {
-        type: jsPsychHtmlKeyboardResponse,
-        stimulus: '<p>每回合你會聽到兩個聲音，請判斷聲音是否相同</p>' +
-                  '<p>當聲音相同，請按 <strong>Z 鍵</strong>，不同按 <strong>/ 鍵</strong></p>' +
-                  '<p>按任意鍵繼續</p>'
-    };
-    timeline.push(introduction);
-
-    var fixation = {
-        type: jsPsychHtmlKeyboardResponse,
-        stimulus: '<div style="font-size:60px;">+</div>',
-        choices: "NO_KEYS",
-        trial_duration: 1000,
-        data: { task: 'fixation' }
-        };
-
-        // 聲音刺激
-    var sounds = ['A.wav', 'B.wav', 'C.wav',
-                'D.wav', 'E.wav', 'F.wav',
-                'G.wav', 'da.wav', 'da3.wav', 'du.wav'];
-
-    function createSoundTrial() {
-        let chosen_sounds = jsPsych.randomization.sampleWithoutReplacement(sounds, 2);
-            
-        var sound_trial_1 = {
-            type: jsPsychAudioKeyboardResponse,
-            stimulus: chosen_sounds[0],
-            prompt: "<p>第一個聲音播放中...</p>",
-            choices: "NO_KEYS",
-            trial_ends_after_audio: true
-        };
-
-        var sound_trial_2 = {
-            type: jsPsychAudioKeyboardResponse,
-            stimulus: chosen_sounds[1],
-            prompt: "<p>第二個聲音播放中...</p>",
-            choices: "NO_KEYS",
-            trial_ends_after_audio: true
-        };
-
-        var judgment_screen = {
+        timeline.push({
             type: jsPsychHtmlKeyboardResponse,
-            stimulus: "<p>請判斷兩個聲音是否相同</p>" +
-                        "<p>如果相同，請按 <strong>z</strong>，如果不同，請按 <strong>/</strong></p>",
-            choices: ['z', '/'],
-            on_finish: function(data) {
-                var correct_response = (chosen_sounds[0] === chosen_sounds[1]) ? 'z' : '/';
-                data.correct = (data.response === correct_response) ? 1 : 0;
-                data.correct_response = correct_response;
-                data.sound_trial_1 = chosen_sounds[0];
-                data.sound_trial_2 = chosen_sounds[1];
-            }
-        };
-
-        return [fixation,sound_trial_1, sound_trial_2, judgment_screen];
-    }
-
-    for (let i = 0; i < 11; i++) {
-        timeline.push(...createSoundTrial());
-    }
-
-    timeline.push({
-        type: jsPsychHtmlKeyboardResponse,
-        stimulus: '<p>按任意鍵結束實驗，感謝您的參與！</p>'+
-                  '<p>有任何問題可寄信至:brain.learning.lab@gmail.com </p>'
+            stimulus:   
+                <div style="text-align: justify;">
+                    <p>感謝你參加本次實驗，以下是實驗相關內容與同意參加確認。</p>
+                    <p>實驗目的:字形相異判斷與反應時間</p>
+                    <p>研究方法與程序:閱讀本頁面後，你會進入練習的部分，此部分主要是讓你熟悉實驗中會用到的反應按鍵，以及你所需要的操作。預計有五題。</p>
+                    <p>接著便是正式實驗，時間約為30分鐘。</p>
+                    <p>實驗副作用:實驗不會帶來任何副作用</p>
+                    <p>實驗退出及中止:你可以隨時撤銷同意或中止實驗。</p>
+                    <p>本實驗由國立台灣師範大學李俊仁老師實驗室發布</p>
+                    <p>按任意鍵繼續</p>
+                </div>
         });
 
-    jsPsych.run(timeline);
+        // 受試者姓名和日期輸入
+        var nameAndDateInput = {
+            type: jsPsychSurveyHtmlForm,
+            preamble: '<p>請輸入您的姓名以及今日日期</p>',
+            html: 
+                <p>本人 <input id="first" name="first" type="text" placeholder="姓名" required /> 
+                已看完上頁內容, 於 <input id="second" name="second" type="date" required /> 
+                同意參加本實驗。</p>
+            ,
+            on_finish: function(data) {
+                jsPsych.data.addProperties({
+                    name: data.response.first,
+                    date: data.response.second
+                });
+            }
+        };
+        timeline.push(nameAndDateInput);
+
+        // 受試者編碼輸入
+        const code_entry = {
+            type: jsPsychSurveyHtmlForm,
+            preamble: '<p>請輸入您的受試者編碼：</p>',
+            html: '<p>受試者編碼: <input type="text" name="subject_code" size="10" required /></p>',
+            on_finish: function(data) {
+                jsPsych.data.addProperties({
+                    subject_code: data.response.subject_code
+                });
+            }
+        };
+        timeline.push(code_entry);
+
+        // 任務說明
+        const introduction = {
+            type: jsPsychHtmlKeyboardResponse,
+            stimulus: '<p>每回合你會聽到兩個聲音，請判斷聲音是否相同</p>' +
+                      '<p>當聲音相同，請按 <strong>Z 鍵</strong>，不同按 <strong>/ 鍵</strong></p>' +
+                      '<p>按任意鍵繼續</p>'
+        };
+        timeline.push(introduction);
+
+        var fixation = {
+            type: jsPsychHtmlKeyboardResponse,
+            stimulus: '<div style="font-size:60px;">+</div>',
+            choices: "NO_KEYS",
+            trial_duration: 1000,
+            data: { task: 'fixation' }
+            };
+
+        // 聲音刺激
+        var sounds = ['A.wav', 'B.wav', 'C.wav',
+                      'D.wav', 'E.wav', 'F.wav',
+                      'G.wav', 'da.wav', 'da3.wav', 'du.wav'];
+
+        function createSoundTrial() {
+            let chosen_sounds = jsPsych.randomization.sampleWithoutReplacement(sounds, 2);
+            
+            var sound_trial_1 = {
+                type: jsPsychAudioKeyboardResponse,
+                stimulus: chosen_sounds[0],
+                prompt: "<p>第一個聲音播放中...</p>",
+                choices: "NO_KEYS",
+                trial_ends_after_audio: true
+            };
+
+            var sound_trial_2 = {
+                type: jsPsychAudioKeyboardResponse,
+                stimulus: chosen_sounds[1],
+                prompt: "<p>第二個聲音播放中...</p>",
+                choices: "NO_KEYS",
+                trial_ends_after_audio: true
+            };
+
+            var judgment_screen = {
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: "<p>請判斷兩個聲音是否相同</p>" +
+                          "<p>如果相同，請按 <strong>z</strong>，如果不同，請按 <strong>/</strong></p>",
+                choices: ['z', '/'],
+                on_finish: function(data) {
+                    var correct_response = (chosen_sounds[0] === chosen_sounds[1]) ? 'z' : '/';
+                    data.correct = (data.response === correct_response) ? 1 : 0;
+                    data.correct_response = correct_response;
+                    data.sound_trial_1 = chosen_sounds[0];
+                    data.sound_trial_2 = chosen_sounds[1];
+                }
+            };
+
+            return [fixation,sound_trial_1, sound_trial_2, judgment_screen];
+        }
+
+        for (let i = 0; i < 11; i++) {
+            timeline.push(...createSoundTrial());
+        }
+
+        timeline.push({
+            type: jsPsychHtmlKeyboardResponse,
+            stimulus: '<p>按任意鍵結束實驗，感謝您的參與！</p>'+
+                        '<p>有任何問題可寄信至:brain.learning.lab@gmail.com </p>'
+            });
+
+        jsPsych.run(timeline);
     </script>
-</body>
 </html>
-
-
