@@ -77,7 +77,7 @@
             fetch(url, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(allData),
+                body: JSON.stringify({ experiment_data: allData }),
                 mode: "no-cors"
             })
             .catch(error => console.error("Error:", error));
